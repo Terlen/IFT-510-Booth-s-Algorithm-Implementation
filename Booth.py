@@ -78,11 +78,13 @@ def main():
     multiplier = input("Please enter the multiplier: ")
     multiplicandBinary = []
     multiplierBinary = []
+    #print(len(multiplicand))
     negativeMultiplier = 0
     negativeMultiplicand = 0
     if len(multiplicand) == 8 and len(multiplier)== 8:
         for char in multiplicand:
             multiplicandBinary.append(int(char))
+            print
         for char in multiplier:
             multiplierBinary.append(int(char))
     else:
@@ -96,49 +98,53 @@ def main():
         multiplier = bin(int(multiplier))
         multiplicand = multiplicand[2:]
         multiplier = multiplier[2:]
-    if negativeMultiplier == 1:
-        padding = 8 - len(multiplier)
-        while padding > 0:
-            multiplierBinary.append(0)
-            padding -= 1
-        for char in multiplier:
-            multiplierBinary.append(int(char))
-        multiplierBinary = twosCompliment(multiplierBinary)
-    elif negativeMultiplier == 0:
-        padding = 8 - len(multiplier)
-        while padding > 0:
-            multiplierBinary.append(0)
-            padding -= 1
-        for char in multiplier:
-            multiplierBinary.append(int(char))
-    if negativeMultiplicand == 1:
-        padding = 8 - len(multiplicand)
-        while padding > 0:
-            multiplicandBinary.append(0)
-            padding -= 1
-        for char in multiplicand:
-            multiplicandBinary.append(int(char))
-        multiplicandBinary = twosCompliment(multiplicandBinary)
-        print("Padded multiplicand",multiplicandBinary)
-    elif negativeMultiplicand == 0:
-        padding = 8 - len(multiplicand)
-        while padding > 0:
-            multiplicandBinary.append(0)
-            padding -= 1
-        for char in multiplicand:
-            multiplicandBinary.append(int(char))
+        if negativeMultiplier == 1:
+            padding = 8 - len(multiplier)
+            while padding > 0:
+                multiplierBinary.append(0)
+                padding -= 1
+            for char in multiplier:
+                multiplierBinary.append(int(char))
+            multiplierBinary = twosCompliment(multiplierBinary)
+        elif negativeMultiplier == 0:
+            padding = 8 - len(multiplier)
+            while padding > 0:
+                multiplierBinary.append(0)
+                padding -= 1
+            for char in multiplier:
+                multiplierBinary.append(int(char))
+        if negativeMultiplicand == 1:
+            padding = 8 - len(multiplicand)
+            while padding > 0:
+                multiplicandBinary.append(0)
+                padding -= 1
+            for char in multiplicand:
+                multiplicandBinary.append(int(char))
+            multiplicandBinary = twosCompliment(multiplicandBinary)
+            print("Padded multiplicand",multiplicandBinary)
+        elif negativeMultiplicand == 0:
+            padding = 8 - len(multiplicand)
+            while padding > 0:
+                multiplicandBinary.append(0)
+                padding -= 1
+            for char in multiplicand:
+                multiplicandBinary.append(int(char))
 
 
         print(multiplicand,multiplier)
 
-    #print("Multiplier: ", multiplierBinary)
-    #print("multiplicand: ", multiplicandBinary)
+    print("Multiplier: ", multiplierBinary)
+    print("multiplicand: ", multiplicandBinary)
     q1 = 0
     count = 8
     runningproduct = [0,0,0,0,0,0,0,0]
+    product = '0b'
+    productPositive = []
+    paddingStop = 0
+    negate = 0
     multiplicandCompliment = list(multiplicandBinary)
     multiplicandCompliment = twosCompliment(multiplicandCompliment)
-    #print("Original compliment: ",multiplicandCompliment)
+    print("Original compliment: ",multiplicandCompliment)
     while count != 0:
         #print("Loop: ",multiplicandCompliment)
         if multiplierBinary[-1] == 1 and q1 == 0:
@@ -147,7 +153,7 @@ def main():
             #print("total check",multiplicandCompliment)
             shiftResult = shiftRight(runningproduct)
             runningproduct = shiftResult[0]
-            # print("Shift2 inputs: ",shiftResult[0], shiftResult[1])
+            print("Shift2 inputs: ",shiftResult[0], shiftResult[1])
             shiftResult = shiftRight(multiplierBinary, shiftResult[1])
             q1 = shiftResult[1]
             multiplierBinary = shiftResult[0]
@@ -170,6 +176,27 @@ def main():
             multiplierBinary = shiftResult[0]
             count -=1
             print("Shift : ", runningproduct, multiplierBinary, q1, multiplicandBinary)
-    print(runningproduct, multiplierBinary)
+    for bit in multiplierBinary:
+        runningproduct.append(bit)
+    print("HERE",runningproduct)
+    for bit in runningproduct:
+        product += str(bit)
+    print("YO",product)
+    print(negativeMultiplier,negativeMultiplicand)
+    if ((negativeMultiplicand == 1 or negativeMultiplier == 1) and not (negativeMultiplicand == 1 and negativeMultiplier == 1)) or product[3] is '1':
+        product = bin(int(product,2)-1)[2:]
+        print("SUB ONE",product)
+        for bit in product:
+            productPositive.append(int(bit))
+        productPositive = bitInversion(productPositive)
+        print("Positive Product",productPositive)
+        product = '0b'
+        for bit in productPositive:
+            product += str(bit)
+        negate = 1
+    if negate == 1:
+        print(int(product,2)*-1)
+    else:
+        print(int(product,2))
 
 main()
