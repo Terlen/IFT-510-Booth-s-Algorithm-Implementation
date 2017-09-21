@@ -1,5 +1,7 @@
 # Aidan Payne
 # IFT 510 Booth's Algorithm Implementation
+
+# Import deque to help implement arithmetic shifting
 from collections import deque
 
 # Function that inverts a binary value.
@@ -15,7 +17,7 @@ def bitInversion(invert):
 # Function to find two's compliment value of a given binary value
 def twosCompliment(multiplicandValue):
     compliment = bitInversion(multiplicandValue)
-    print("bit inversion: ",compliment)
+    #print("bit inversion: ",compliment)
     compliment.reverse()
     carry = 0
     for index, item in enumerate(compliment):
@@ -61,6 +63,7 @@ def binaryAddition(value1,value2):
     binarySum.reverse()
     return binarySum
 
+# Function to perform arithmetic right shift. Pass a value to be shifted and an optional bit being carried into the shift (A0 -> Qn)
 def shiftRight(value, addedBit=None):
     shiftedValue = deque(value)
     if shiftedValue[0] == 0 and addedBit is None:
@@ -73,6 +76,7 @@ def shiftRight(value, addedBit=None):
     shiftedExtra = [list(shiftedValue),extraBit]
     return shiftedExtra
 
+# Main function to perform Booth's algorithm given a decimal or binary multiplicand and multiplier
 def main():
     multiplicand = input("Please enter the multiplicand: ")
     multiplier = input("Please enter the multiplier: ")
@@ -121,7 +125,7 @@ def main():
             for char in multiplicand:
                 multiplicandBinary.append(int(char))
             multiplicandBinary = twosCompliment(multiplicandBinary)
-            print("Padded multiplicand",multiplicandBinary)
+            #print("Padded multiplicand",multiplicandBinary)
         elif negativeMultiplicand == 0:
             padding = 8 - len(multiplicand)
             while padding > 0:
@@ -129,12 +133,10 @@ def main():
                 padding -= 1
             for char in multiplicand:
                 multiplicandBinary.append(int(char))
+        #print(multiplicand,multiplier)
 
-
-        print(multiplicand,multiplier)
-
-    print("Multiplier: ", multiplierBinary)
-    print("multiplicand: ", multiplicandBinary)
+    #print("Multiplier: ", multiplierBinary)
+    #print("multiplicand: ", multiplicandBinary)
     q1 = 0
     count = 8
     runningproduct = [0,0,0,0,0,0,0,0]
@@ -144,21 +146,21 @@ def main():
     negate = 0
     multiplicandCompliment = list(multiplicandBinary)
     multiplicandCompliment = twosCompliment(multiplicandCompliment)
-    print("Original compliment: ",multiplicandCompliment)
+    #print("Original compliment: ",multiplicandCompliment)
     while count != 0:
         #print("Loop: ",multiplicandCompliment)
         if multiplierBinary[-1] == 1 and q1 == 0:
-            print(runningproduct, multiplicandCompliment)
+            #print(runningproduct, multiplicandCompliment)
             runningproduct = binaryAddition(runningproduct, multiplicandCompliment)
             #print("total check",multiplicandCompliment)
             shiftResult = shiftRight(runningproduct)
             runningproduct = shiftResult[0]
-            print("Shift2 inputs: ",shiftResult[0], shiftResult[1])
+            #print("Shift2 inputs: ",shiftResult[0], shiftResult[1])
             shiftResult = shiftRight(multiplierBinary, shiftResult[1])
             q1 = shiftResult[1]
             multiplierBinary = shiftResult[0]
             count -= 1
-            print("A-M and Shift: ",runningproduct, multiplierBinary, q1, multiplicandBinary)
+            #print("A-M and Shift: ",runningproduct, multiplierBinary, q1, multiplicandBinary)
         elif multiplierBinary[-1] == 0 and q1 == 1:
             runningproduct = binaryAddition(runningproduct, multiplicandBinary)
             shiftResult = shiftRight(runningproduct)
@@ -167,7 +169,7 @@ def main():
             q1 = shiftResult[1]
             multiplierBinary = shiftResult[0]
             count -=1
-            print("A+M and shift: ", runningproduct, multiplierBinary, q1, multiplicandBinary)
+            #print("A+M and shift: ", runningproduct, multiplierBinary, q1, multiplicandBinary)
         else:
             shiftResult = shiftRight(runningproduct)
             runningproduct = shiftResult[0]
@@ -175,21 +177,21 @@ def main():
             q1 = shiftResult[1]
             multiplierBinary = shiftResult[0]
             count -=1
-            print("Shift : ", runningproduct, multiplierBinary, q1, multiplicandBinary)
+            #print("Shift : ", runningproduct, multiplierBinary, q1, multiplicandBinary)
     for bit in multiplierBinary:
         runningproduct.append(bit)
-    print("HERE",runningproduct)
+    #print("HERE",runningproduct)
     for bit in runningproduct:
         product += str(bit)
-    print("YO",product)
-    print(negativeMultiplier,negativeMultiplicand)
+    #print("YO",product)
+    #print(negativeMultiplier,negativeMultiplicand)
     if ((negativeMultiplicand == 1 or negativeMultiplier == 1) and not (negativeMultiplicand == 1 and negativeMultiplier == 1)) or product[3] is '1':
         product = bin(int(product,2)-1)[2:]
-        print("SUB ONE",product)
+        #print("SUB ONE",product)
         for bit in product:
             productPositive.append(int(bit))
         productPositive = bitInversion(productPositive)
-        print("Positive Product",productPositive)
+        #print("Positive Product",productPositive)
         product = '0b'
         for bit in productPositive:
             product += str(bit)
