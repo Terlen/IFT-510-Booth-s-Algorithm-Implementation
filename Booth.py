@@ -2,9 +2,6 @@
 # IFT 510 Booth's Algorithm Implementation
 from collections import deque
 
-# User Input
-
-
 # Function that inverts a binary value.
 def bitInversion(invert):
     invertedValue = invert
@@ -81,24 +78,73 @@ def main():
     multiplier = input("Please enter the multiplier: ")
     multiplicandBinary = []
     multiplierBinary = []
-    for char in multiplicand:
-        multiplicandBinary.append(int(char))
-    for char in multiplier:
-        multiplierBinary.append(int(char))
-    print("Multiplier: ", multiplierBinary)
-    print("multiplicand: ", multiplicandBinary)
+    negativeMultiplier = 0
+    negativeMultiplicand = 0
+    if len(multiplicand) == 8 and len(multiplier)== 8:
+        for char in multiplicand:
+            multiplicandBinary.append(int(char))
+        for char in multiplier:
+            multiplierBinary.append(int(char))
+    else:
+        if multiplicand[0] is '-':
+            negativeMultiplicand = 1
+            multiplicand = multiplicand[1:]
+        if multiplier[0] is '-':
+            negativeMultiplier = 1
+            multiplier = multiplier[1:]
+        multiplicand = bin(int(multiplicand))
+        multiplier = bin(int(multiplier))
+        multiplicand = multiplicand[2:]
+        multiplier = multiplier[2:]
+    if negativeMultiplier == 1:
+        padding = 8 - len(multiplier)
+        while padding > 0:
+            multiplierBinary.append(0)
+            padding -= 1
+        for char in multiplier:
+            multiplierBinary.append(int(char))
+        multiplierBinary = twosCompliment(multiplierBinary)
+    elif negativeMultiplier == 0:
+        padding = 8 - len(multiplier)
+        while padding > 0:
+            multiplierBinary.append(0)
+            padding -= 1
+        for char in multiplier:
+            multiplierBinary.append(int(char))
+    if negativeMultiplicand == 1:
+        padding = 8 - len(multiplicand)
+        while padding > 0:
+            multiplicandBinary.append(0)
+            padding -= 1
+        for char in multiplicand:
+            multiplicandBinary.append(int(char))
+        multiplicandBinary = twosCompliment(multiplicandBinary)
+        print("Padded multiplicand",multiplicandBinary)
+    elif negativeMultiplicand == 0:
+        padding = 8 - len(multiplicand)
+        while padding > 0:
+            multiplicandBinary.append(0)
+            padding -= 1
+        for char in multiplicand:
+            multiplicandBinary.append(int(char))
+
+
+        print(multiplicand,multiplier)
+
+    #print("Multiplier: ", multiplierBinary)
+    #print("multiplicand: ", multiplicandBinary)
     q1 = 0
     count = 8
     runningproduct = [0,0,0,0,0,0,0,0]
     multiplicandCompliment = list(multiplicandBinary)
     multiplicandCompliment = twosCompliment(multiplicandCompliment)
-    print("Original compliment: ",multiplicandCompliment)
+    #print("Original compliment: ",multiplicandCompliment)
     while count != 0:
         #print("Loop: ",multiplicandCompliment)
         if multiplierBinary[-1] == 1 and q1 == 0:
-            #print(runningproduct, multiplicandCompliment)
+            print(runningproduct, multiplicandCompliment)
             runningproduct = binaryAddition(runningproduct, multiplicandCompliment)
-            print("total check",multiplicandCompliment)
+            #print("total check",multiplicandCompliment)
             shiftResult = shiftRight(runningproduct)
             runningproduct = shiftResult[0]
             # print("Shift2 inputs: ",shiftResult[0], shiftResult[1])
@@ -126,13 +172,4 @@ def main():
             print("Shift : ", runningproduct, multiplierBinary, q1, multiplicandBinary)
     print(runningproduct, multiplierBinary)
 
-# Array definition
-
 main()
-
-
-
-
-# print("Binary Multiplicand: ",multiplicandBinary)
-# print("Binary Multiplier: ",multiplierBinary)
-# print(binaryAddition(multiplicandBinary, multiplierBinary))
