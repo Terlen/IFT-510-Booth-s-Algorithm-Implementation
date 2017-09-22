@@ -17,7 +17,7 @@ def bitInversion(invert):
 # Function to find two's compliment value of a given binary value
 def twosCompliment(multiplicandValue):
     compliment = bitInversion(multiplicandValue)
-    #print("bit inversion: ",compliment)
+    # Reverse string so addition occurs from LSB to MSB
     compliment.reverse()
     carry = 0
     for index, item in enumerate(compliment):
@@ -37,13 +37,15 @@ def twosCompliment(multiplicandValue):
         elif item == 1 and carry == 0:
             compliment[index] = 1
             carry = 0
+    # Once addition is completed, reverse string back into correct MSB -> LSB
     compliment.reverse()
     return compliment
 
-# Function to perform binary addition
+# Function to perform binary addition of two values
 def binaryAddition(value1,value2):
     binarySum = []
     reverseValue2 = list(value2)
+    # Reverse values to perform addition from LSB to MSB
     value1.reverse()
     reverseValue2.reverse()
     carry = 0
@@ -72,25 +74,41 @@ def shiftRight(value, addedBit=None):
         shiftedValue.appendleft(1)
     elif addedBit is not None:
         shiftedValue.appendleft(addedBit)
+    # Bit shifted off the end of multiplier should be preserved and stored in Q-1
     extraBit = shiftedValue.pop()
     shiftedExtra = [list(shiftedValue),extraBit]
     return shiftedExtra
 
 # Main function to perform Booth's algorithm given a decimal or binary multiplicand and multiplier
 def main():
-    multiplicand = input("Please enter the multiplicand: ")
-    multiplier = input("Please enter the multiplier: ")
+    q1 = 0
+    count = 8
+    runningproduct = [0,0,0,0,0,0,0,0]
+    product = '0b'
+    productPositive = []
+    paddingStop = 0
+    negate = 0
     multiplicandBinary = []
     multiplierBinary = []
-    #print(len(multiplicand))
     negativeMultiplier = 0
     negativeMultiplicand = 0
+    multiplicand = input("Please enter the multiplicand: ")
+    multiplier = input("Please enter the multiplier: ")
+    # Input is two 8 bit values
     if len(multiplicand) == 8 and len(multiplier)== 8:
         for char in multiplicand:
             multiplicandBinary.append(int(char))
-            print
+            #print
         for char in multiplier:
             multiplierBinary.append(int(char))
+    # Input is one 8 bit value and one decimal value
+    elif len(multiplicand) == 8 and len(multiplier) != 8:
+        print("Please enter two binary or two decimal values")
+        exit()
+    elif len(multiplicand) !=8 and len(multiplier) == 8:
+        print("Please enter two binary or two decimal values")
+        exit()
+    # Input is two decimal values
     else:
         if multiplicand[0] is '-':
             negativeMultiplicand = 1
@@ -98,6 +116,7 @@ def main():
         if multiplier[0] is '-':
             negativeMultiplier = 1
             multiplier = multiplier[1:]
+        # Convert decimal value to binary string representation
         multiplicand = bin(int(multiplicand))
         multiplier = bin(int(multiplier))
         multiplicand = multiplicand[2:]
@@ -125,7 +144,6 @@ def main():
             for char in multiplicand:
                 multiplicandBinary.append(int(char))
             multiplicandBinary = twosCompliment(multiplicandBinary)
-            #print("Padded multiplicand",multiplicandBinary)
         elif negativeMultiplicand == 0:
             padding = 8 - len(multiplicand)
             while padding > 0:
@@ -133,34 +151,21 @@ def main():
                 padding -= 1
             for char in multiplicand:
                 multiplicandBinary.append(int(char))
-        #print(multiplicand,multiplier)
-
-    #print("Multiplier: ", multiplierBinary)
-    #print("multiplicand: ", multiplicandBinary)
-    q1 = 0
-    count = 8
-    runningproduct = [0,0,0,0,0,0,0,0]
-    product = '0b'
-    productPositive = []
-    paddingStop = 0
-    negate = 0
+    # Calculate compliment of multiplcand for later operations
     multiplicandCompliment = list(multiplicandBinary)
     multiplicandCompliment = twosCompliment(multiplicandCompliment)
-    #print("Original compliment: ",multiplicandCompliment)
+    # Booth Algorithm
     while count != 0:
-        #print("Loop: ",multiplicandCompliment)
+        # A = A - M and Shift
         if multiplierBinary[-1] == 1 and q1 == 0:
-            #print(runningproduct, multiplicandCompliment)
             runningproduct = binaryAddition(runningproduct, multiplicandCompliment)
-            #print("total check",multiplicandCompliment)
             shiftResult = shiftRight(runningproduct)
             runningproduct = shiftResult[0]
-            #print("Shift2 inputs: ",shiftResult[0], shiftResult[1])
             shiftResult = shiftRight(multiplierBinary, shiftResult[1])
             q1 = shiftResult[1]
             multiplierBinary = shiftResult[0]
             count -= 1
-            #print("A-M and Shift: ",runningproduct, multiplierBinary, q1, multiplicandBinary)
+        # A = A + M and Shift
         elif multiplierBinary[-1] == 0 and q1 == 1:
             runningproduct = binaryAddition(runningproduct, multiplicandBinary)
             shiftResult = shiftRight(runningproduct)
@@ -169,7 +174,7 @@ def main():
             q1 = shiftResult[1]
             multiplierBinary = shiftResult[0]
             count -=1
-            #print("A+M and shift: ", runningproduct, multiplierBinary, q1, multiplicandBinary)
+        # Only Shift
         else:
             shiftResult = shiftRight(runningproduct)
             runningproduct = shiftResult[0]
@@ -177,28 +182,27 @@ def main():
             q1 = shiftResult[1]
             multiplierBinary = shiftResult[0]
             count -=1
-            #print("Shift : ", runningproduct, multiplierBinary, q1, multiplicandBinary)
+    # Combine multiplier and runningproduct to create 16 bit result
     for bit in multiplierBinary:
         runningproduct.append(bit)
-    #print("HERE",runningproduct)
     for bit in runningproduct:
         product += str(bit)
-    #print("YO",product)
-    #print(negativeMultiplier,negativeMultiplicand)
+    # If either multiplier or multiplicand were negative, change sign of final product
     if ((negativeMultiplicand == 1 or negativeMultiplier == 1) and not (negativeMultiplicand == 1 and negativeMultiplier == 1)) or product[3] is '1':
+        # Undo two's compliment to obtain positive binary value
         product = bin(int(product,2)-1)[2:]
-        #print("SUB ONE",product)
         for bit in product:
             productPositive.append(int(bit))
         productPositive = bitInversion(productPositive)
-        #print("Positive Product",productPositive)
         product = '0b'
         for bit in productPositive:
             product += str(bit)
         negate = 1
+    # Print output. If answer should be negative, negate the value.
     if negate == 1:
         print(int(product,2)*-1)
     else:
         print(int(product,2))
 
+# Main function call
 main()
